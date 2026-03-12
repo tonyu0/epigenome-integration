@@ -14,9 +14,9 @@ gunzip *.gz
 
 # Limit the target genome to only chromosome 20
 # (also: samtools faidx GRCh38.fasta && samtools faidx GRCh38.fasta outChr20 > outChr20.fa)
-perl scripts/extract-selected-chr-from-fa.pl Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa 20
+# perl scripts/extract-selected-chr-from-fa.pl Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa 20
 # Limit the target annotation to only chromosome 20
-sh scripts/extract-selected-chr-from-gtf.sh Homo_sapiens.GRCh38.112.gtf 20
+# sh scripts/extract-selected-chr-from-gtf.sh Homo_sapiens.GRCh38.112.gtf 20
 # Now outChr20.fa and outChr20.gtf exist in the current directory
 
 # ====================
@@ -34,7 +34,7 @@ nextflow run nf-core/fetchngs -profile docker --input ids.csv --outdir ./fetchng
 awk 'BEGIN{FS=OFS=","} NR==1{print $0, "\"strandedness\""} NR>1{print $0, "\"auto\""}' ./fetchngs_output/samplesheet/samplesheet.csv > ./fetchngs_output/samplesheet/samplesheet-with-strandedness.csv
 
 # Run RNA-seq pipeline
-nextflow run nf-core/rnaseq -profile docker --input ./fetchngs_output/samplesheet/samplesheet-with-strandedness.csv --outdir ./rnaseq_output --fasta outChr20.fa --gtf outChr20.gtf --aligner star_salmon
+nextflow run nf-core/rnaseq -profile docker --input ./fetchngs_output/samplesheet/samplesheet-with-strandedness.csv --outdir ./rnaseq_output --fasta Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa --gtf Homo_sapiens.GRCh38.112.gtf --aligner star_salmon
 
 # Run Bisulfite-seq(RRBS) pipeline
-nextflow run nf-core/methylseq -profile docker --input ./fetchngs_output/samplesheet/samplesheet-with-strandedness.csv --outdir ./methylseq_output --fasta outChr20.fa --rrbs --aligner bismark
+nextflow run nf-core/methylseq -profile docker --input ./fetchngs_output/samplesheet/samplesheet-with-strandedness.csv --outdir ./methylseq_output --fasta Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa --rrbs --aligner bismark
