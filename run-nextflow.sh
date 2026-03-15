@@ -37,4 +37,4 @@ awk 'BEGIN{FS=OFS=","} NR==1{print $0, "\"strandedness\""} NR>1{print $0, "\"aut
 nextflow run nf-core/rnaseq -profile docker --input ./fetchngs_output/samplesheet/samplesheet-with-strandedness.csv --outdir ./rnaseq_output --fasta Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa --gtf Homo_sapiens.GRCh38.112.gtf --aligner star_salmon
 
 # Run Bisulfite-seq(RRBS) pipeline
-nextflow run nf-core/methylseq -profile docker --input ./fetchngs_output/samplesheet/samplesheet-with-strandedness.csv --outdir ./methylseq_output --fasta Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa --rrbs --aligner bismark
+nextflow run nf-core/methylseq -profile docker --input ./fetchngs_output/samplesheet/samplesheet-with-strandedness.csv --outdir ./methylseq_output --fasta Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa --rrbs --aligner bwameth
