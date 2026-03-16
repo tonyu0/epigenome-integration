@@ -28,13 +28,15 @@ nextflow pull nf-core/rnaseq
 nextflow pull nf-core/methylseq
 
 # Fetch SRA data in ids.csv
-nextflow run nf-core/fetchngs -profile docker --input ids.csv --outdir ./fetchngs_output
+nextflow run nf-core/fetchngs -profile docker --input ids_rnaseq.csv --outdir ./fetchngs_output/rnaseq
+nextflow run nf-core/fetchngs -profile docker --input ids_rrbs.csv --outdir ./fetchngs_output/rrbs
 
 # output csv did not have the field 'strandedness', so add it
-awk 'BEGIN{FS=OFS=","} NR==1{print $0, "\"strandedness\""} NR>1{print $0, "\"auto\""}' ./fetchngs_output/samplesheet/samplesheet.csv > ./fetchngs_output/samplesheet/samplesheet-with-strandedness.csv
+awk 'BEGIN{FS=OFS=","} NR==1{print $0, "\"strandedness\""} NR>1{print $0, "\"auto\""}' ./fetchngs_output/rnaseq/samplesheet/samplesheet.csv > ./fetchngs_output/rnaseq/samplesheet/samplesheet-with-strandedness.csv
+awk 'BEGIN{FS=OFS=","} NR==1{print $0, "\"strandedness\""} NR>1{print $0, "\"auto\""}' ./fetchngs_output/rrbs/samplesheet/samplesheet.csv > ./fetchngs_output/rrbs/samplesheet/samplesheet-with-strandedness.csv
 
 # Run RNA-seq pipeline
-nextflow run nf-core/rnaseq -profile docker --input ./fetchngs_output/samplesheet/samplesheet-with-strandedness.csv --outdir ./rnaseq_output --fasta Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa --gtf Homo_sapiens.GRCh38.112.gtf --aligner star_salmon
+nextflow run nf-core/rnaseq -profile docker --input ./fetchngs_output/rnaseq/samplesheet/samplesheet-with-strandedness.csv --outdir ./rnaseq_output --fasta Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa --gtf Homo_sapiens.GRCh38.112.gtf --aligner star_salmon
 
 # Run Bisulfite-seq(RRBS) pipeline
-nextflow run nf-core/methylseq -profile docker --input ./fetchngs_output/samplesheet/samplesheet-with-strandedness.csv --outdir ./methylseq_output --fasta Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa --rrbs --aligner bwameth
+nextflow run nf-core/methylseq -profile docker --input ./fetchngs_output/rrbs/samplesheet/samplesheet-with-strandedness.csv --outdir ./methylseq_output --fasta Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa --rrbs --aligner bismark
