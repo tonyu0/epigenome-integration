@@ -52,3 +52,22 @@ gcloud init
 gsutil cp rnaseq_output.tar.gz gs://[bucket name]/
 gsutil cp methylseq_output.tar.gz gs://[bucket name]/
 ```
+
+## Data check
+* rnaseq_output/multiqc/star_salmon/multiqc_report.html
+
+* methylseq_output/multiqc/bwameth/multiqc_report.html
+
+## Analysis using R
+```R
+# if R is not installed:
+sudo apt-get install r-base r-base-dev
+
+# find DEGs (saved to DEGs.csv)
+Rscript scripts/rnaseq_to_DEGs.R
+
+# find DMRs (saved to DMRs.bed)
+Rscript scripts/methylseq_to_DMRs.R
+
+```
+
