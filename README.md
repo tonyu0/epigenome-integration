@@ -2,29 +2,75 @@
 
 ## Overview
 
-Tissue-specific Differentially Methylated Region (DMR) on CpG island shores and Tissue-specific Differentially Expressed Genes (DEGs) integration analysis
+This is an analysis similar to my previous research, but on a smaller dataset.
 
-Epigenome regulation analysis pipeline
+This project implements an integrative epigenomics analysis pipeline combining:
 
 - RRBS methylation analysis
 - RNA-seq expression analysis
 - Integrate two analysis above
 
-### Result
-One gene was identified in which DMR on CpG island shores in the promoter region appears to influence downstream gene expression, i.e. MME (membrane metalloendopeptidase).
+The goal is to identify **tissue-specific Differentially Methylated Regions (DMRs)** on CpG island shores and investigate their association with **Differentially Expressed Genes (DEGs)**.
 
-### Data Source
-RNA-seq & RRBS Data: PRJNA880812 (Liver, Primary samples)
-Reference Paper: Rodger EJ et al., "An epigenetic signature of advanced colorectal cancer metastasis.", iScience, 2023 Jun 16;26(6):106986. doi:
-10.1016/j.isci.2023.106986
+--- 
+
+### Background
+
+DNA methylation in CpG island shores is known to be associated with tissue-specific gene regulation.  
+This project focuses on identifying DMRs located in promoter regions and evaluating their relationship with downstream gene expression.
+
+---
+
+### Dataset
+- Source: PRJNA880812  
+- Samples:
+  - Primary colorectal tumors
+  - Liver metastases  
+- Replicates: 2 biological replicates per condition (limited sample size)
+
+Reference:  
+Rodger EJ et al., *An epigenetic signature of advanced colorectal cancer metastasis.*, iScience (2023)  
 https://doi.org/10.1016/j.isci.2023.106986
 
+--- 
+
+### Result
+
+Three genes were identified in which DMR on CpG island shores in the promoter region is associated with downstream gene expression.
+
+| Gene | diff.Methylation | log2FC |
+|------|----------------|--------|
+| PIEZO2 | 0.147 | +3.63 |
+| MME | 0.197 | -4.01 |
+| LOC124904613 | 0.177 | +3.40 |
+
+Among the candidates, **MME (membrane metalloendopeptidase)** showed:
+
+
+- increased methylation in CpG island shore of the promoter region
+- decreased gene expression
+
+This suggests that DNA methylation **may be associated with gene repression** of MME.
+
+(Fig. 1 is a scatter plot of methylation degree and expression level of three genes. Fig. 2 is the location of DMR, CpGisland, and shore around the MME gene.)
+
+| Fig. 1 | Fig. 2 |
+|--------|--------|
+| <img width="600" height="700" alt="Fig. 1" src="https://github.com/user-attachments/assets/d7bd443f-2ee5-4116-8531-96715e5cb363" /> | <img width="880" height="720" alt="MME_integration_plot" src="https://github.com/user-attachments/assets/3d0c555a-a4b6-4d7b-8249-f0e425bb9ef5" /> |
+
+
+---
+
 ### Note
-The following commands was run on GCE (n2-highmem-16 (16 vCPUs, 128 GB Memory, 500GB SSD, Ubuntu 25.10 Minimal)
-It seems the pipelines used in this workflow use up to 12 CPUs and 72 GB of memory without a nextflow.config
+* Small sample size limits statistical power
+* Results should be interpreted as exploratory
+* The following commands was run on GCE (n2-highmem-16 (16 vCPUs, 128 GB Memory, 500GB SSD, Ubuntu 25.10 Minimal)
+* It seems the pipelines used in this workflow use up to 12 CPUs and 72 GB of memory without a nextflow.config
+  
+---
 
 ## Setup 
-```
+```bash
 sudo apt-get update
 
 # Install Docker
@@ -43,7 +89,7 @@ sudo mv nextflow /usr/local/bin/
 ```
 
 ## Run
-```
+```bash
 git clone https://github.com/tonyu0/epigenome-integration.git
 cd epigenome-integration
 
@@ -57,7 +103,7 @@ sh run-nextflow.sh
 ```
 
 ## Data transfer 
-```
+```bash
 # GCP example
 tar -czvf rnaseq_output.tar.gz rnaseq_output
 tar -czvf methylseq_output.tar.gz methylseq_output
@@ -66,13 +112,15 @@ gsutil cp rnaseq_output.tar.gz gs://[bucket name]/
 gsutil cp methylseq_output.tar.gz gs://[bucket name]/
 ```
 
-## Data check
+## Data QC
+Check MultiQC reports:
+
 * rnaseq_output/multiqc/star_salmon/multiqc_report.html
 
 * methylseq_output/multiqc/bwameth/multiqc_report.html
 
-## Analysis using R
-```R
+## ADownstream Analysis with R
+```bash
 # if R is not installed:
 sudo apt-get install r-base r-base-dev
 # these are also required for installing package in R
@@ -94,18 +142,3 @@ Rscript scripts/visualize_result.R
 
 ```
 
-## Interpretation of results
-
-In above analysis, three genes are extracted.
-(See "DMRs_regulated_genes.csv")
-
-ENSG00000154864(diff.Methy: 0.14668812964347, log2FoldChange: 3.63034872976175)
-PIEZO2 (piezo type mechanosensitive ion channel component 2)
-
-ENSG00000196549(diff.Methy: 0.196966182641586, log2FoldChange: -4.00606354053707)
-MME (membrane metalloendopeptidase)
-
-ENSG00000273768(diff.Methy: 0.176937585802774, log2FoldChange: 3.39530230478619)
-LOC124904613 (U1 spliceosomal RNA)
-
-Among these, MME shows a negative correlation between methylation level and expression level, suggesting that DMR may be involved in its expression regulation. 
