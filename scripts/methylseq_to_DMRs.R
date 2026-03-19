@@ -25,6 +25,7 @@ load_cov_to_bsseq <- function() {
     "./methylseq_output/bismark/methylation_calls/methylation_coverage/SRX17589490_trimmed_bismark_bt2.bismark.cov.gz"
     )
   # "SRX17589483":Primary#87, "SRX17589490":Primary#314, "SRX17589493":Liver#87, "SRX17589500":Liver#314
+  # Notice that this order of samples affects final results.
   sample_names <- c("Liver#87", "Liver#314", "Primary#87", "Primary#314")
 
   # Bismark .cov format: chr, start, end, meth%, count_meth, count_unmeth
@@ -44,10 +45,13 @@ load_cov_to_bsseq <- function() {
 
 call_dmrs <- function(bsseq_data) {
   # Perform DML test (Differential Methylated Loci)
+  # Notice that group1 and group2 should match the order in bsseq_data.
+  # The final result is diff.Methy, which is the difference of group1 vs group2. 
   dml_test <- DMLtest(bsseq_data, group1=c("Liver#87", "Liver#314"), group2=c("Primary#87", "Primary#314"), smoothing=TRUE)
   
   # Call DMRs (Differential Methylated Regions)
   # delta=0.1 means at least 10% difference in methylation
+  # minCg=3 The minimum number of CpG sites required to define a "region"
   callDMR(dml_test, delta=0.1, p.threshold=0.05, minlen=50, minCG=3, dis.merge=100)
 }
 
@@ -63,13 +67,10 @@ output_dmrs <- function(dmrs) {
   )
   
   # BED format: chr, start, end, name, score, strand
-  write.table(bed_output, "DMRs.bed", sep="\t", quote=FALSE, row.names=T, col.names=T)
+  write.table(bed_output, "DMRs.bed", sep="\t", quote=FALSE, row.names=F, col.names=F)
 }
 
 { # main
-  setwd("~/epigenome-integration")
-  paste("Move to", getwd())
-  
   bsseq_data <- load_cov_to_bsseq()
   dmrs <- call_dmrs(bsseq_data)
   output_dmrs(dmrs)

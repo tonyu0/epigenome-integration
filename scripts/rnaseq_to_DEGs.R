@@ -45,14 +45,13 @@ extract_deg <- function(dds) {
   deg_results <- as.data.frame(res) %>%
     filter(padj < 0.05 & abs(log2FoldChange) > 1) %>%
     mutate(gene_id = rownames(.)) # add gene_id column from row name
+  # LFC is log2(treat / control) (in this analysis, Liver / Primary)
 
-  write.csv(deg_results, "DEGs.csv", sep="\t", quote=F, row.names=T, col.names=T)
+  # Need col.names to combine with DMRs info by gene_id
+  write.csv(deg_results, "DEGs.csv")
 }
 
 { # main
-  setwd("~/epigenome-integration")
-  paste("Move to", getwd())
-  
   dds <- convert_se_to_dds()
   extract_deg(dds)
   # Output to DEGs.csv
