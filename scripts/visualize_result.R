@@ -27,13 +27,20 @@ draw_gene_with_gviz <- function() {
   target_chr <- "chr3" 
   target_start <- 155078000
   target_end   <- 155084000
+  target_gene <- "ENSG00000196549"
   gen <- "hg38"
   
-  axis_track <- GenomeAxisTrack()
+  axis_track <- GenomeAxisTrack(chromosome=target_chr)
   
   txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene
   gene_track <- GeneRegionTrack(txdb, name = "Gene",
                                 genome = gen, chromosome = target_chr,
+                  		from = target_start, to = target_end, 
+				filter = list(gene_id = target_gene), # only target_gene to draw
+				collapseTranscripts = "meta", # all genes(ENSG) and transcripts(ENST) to 1 line
+				showId = TRUE,
+    				geneSymbol = TRUE,
+    				showExonId = FALSE,
                                 transcriptAnnotation = "symbol", background.title = "brown")
   
   # ========== CGI track ==========
@@ -41,32 +48,32 @@ draw_gene_with_gviz <- function() {
   shores_up <- flank(cgi, width = 2000, start = T) # start = T means up side flank, F means down side flank
   shores_down <- flank(cgi, width = 2000, start = F)
   cgi_shores <- reduce(c(shores_up, shores_down)) # Combine and merge overlaps
-  cgi_track   <- AnnotationTrack(cgi, name = "CGI", fill = "green")
-  shore_track <- AnnotationTrack(cgi_shores, name = "Shore", fill = "lightgreen")
+  cgi_track   <- AnnotationTrack(cgi, name = "CGI", fill = "green", chromosome=target_chr)
+  shore_track <- AnnotationTrack(cgi_shores, name = "Shore", fill = "lightgreen", chromosome=target_chr)
   # ========== DMR track ==========
   dmrs <- import("DMRs_chr.bed")
-  dmrs_track   <- AnnotationTrack(dmrs, name = "DMR", fill = "red", alpha = 0.8)
+  dmrs_track   <- AnnotationTrack(dmrs, name = "DMR", fill = "red", alpha = 0.8, chromosome=target_chr)
   
   # Use data only from #314
-#  options(ucscChromosomeNames=FALSE) # bismark bedGraph somehow output error
+#options(ucscChromosomeNames=FALSE) # bismark bedGraph somehow output error
   # ========== RNA-seq track (use bigWig from star_salmon) ==========
-#  liver_expression_track <- DataTrack(range = "rnaseq_output/star_salmon/bigwig/SRX17589504.forward.bigWig", name = "Liver Meth", 
-#                                      type = "gradient", col = "darkred", ylim = c(0, 1))
-#  primary_expression_track <- DataTrack(range = "rnaseq_output/star_salmon/bigwig/SRX17589513.forward.bigWig" , name = "Primary Meth", 
-#                                        type = "gradient", col = "darkblue", ylim = c(0, 1))
+#liver_expression_track <- DataTrack(range = "rnaseq_output/star_salmon/bigwig/SRX17589504.forward.bigWig", name = "Liver RNA", 
+#                                      type = "gradient", col = "darkred", ylim = c(0, 1), chromosome=target_chr)
+#primary_expression_track <- DataTrack(range = "rnaseq_output/star_salmon/bigwig/SRX17589513.forward.bigWig" , name = "Primary RNA", 
+#                                        type = "gradient", col = "darkblue", ylim = c(0, 1), chromosome=target_chr)
   # ========== Methylation track (use bedGraph from bismark) ==========
-#  liver_methylation_track <- DataTrack(range = "methylseq_output/bismark/methylation_calls/bedGraph/SRX17589500_trimmed_bismark_bt2.bedGraph.gz", name = "Liver RNA", 
-#                                       type = "histogram", fill = "salmon", col = "salmon")
-#  primary_methylation_track <- DataTrack(range = "methylseq_output/bismark/methylation_calls/bedGraph/SRX17589490_trimmed_bismark_bt2.bedGraph.gz", name = "Primary RNA", 
-#                                         type = "histogram", fill = "skyblue", col = "skyblue", ucscChro)
+#liver_methylation_track <- DataTrack(range = "methylseq_output/bismark/methylation_calls/bedGraph/SRX17589500_trimmed_bismark_bt2.bedGraph.gz", name = "Liver Meth", 
+#                                       type = "histogram", fill = "salmon", col = "salmon", chromosome=target_chr)
+#primary_methylation_track <- DataTrack(range = "methylseq_output/bismark/methylation_calls/bedGraph/SRX17589490_trimmed_bismark_bt2.bedGraph.gz", name = "Primary Meth", 
+#                                         type = "histogram", fill = "skyblue", col = "skyblue", chromosome=target_chr)
   # ========== Plot ==========
-  png("MME_integration_plot.png", width = 1000, height = 1200, res = 150)
+  png("MME_integration_plot.png", width = 1920, height = 1080, res = 150)
   plotTracks(list(axis_track, 
 #                  liver_expression_track, liver_methylation_track, 
 #                  primary_expression_track, primary_methylation_track, 
                   dmrs_track, shore_track, cgi_track, 
-                  from = target_start, to = target_end, 
                   gene_track),
+             from = target_start, to = target_end, chromosome=target_chr,
              main = "Epigenetic Regulation of MME (ENSG00000196549)", transcriptAnnotation = "symbol")
   dev.off()
 }
